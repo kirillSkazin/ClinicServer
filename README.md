@@ -10,7 +10,7 @@
 Самый простой способ запустить сервер с базой данных:
 
 ```powershell
-cd Server
+cd ClientServer
 copy .env.example .env
 docker compose up --build
 ```
