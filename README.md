@@ -66,14 +66,14 @@ patient.demo
 В отдельном терминале из проекта клиента:
 
 ```powershell
-cd Client
+cd ClinicClient
 mvn javafx:run
 ```
 
 Или после сборки:
 
 ```powershell
-cd Client
+cd ClinicClient
 mvn clean package
 java -jar target\clinic-client.jar
 ```
@@ -100,7 +100,7 @@ MAIL_FROM=your-mail@gmail.com
 ## Тесты
 
 ```powershell
-cd Server
+cd ClinicServer
 mvn -B test
 ```
 
