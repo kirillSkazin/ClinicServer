@@ -1,0 +1,17 @@
+target/
+logs/
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+.env
+.env.*
+!.env.example
+
+Dockerfile
+docker-compose.yml
+DOCKER.md
+
+*.log

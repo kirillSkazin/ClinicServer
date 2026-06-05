@@ -1,0 +1,73 @@
+name: clinic
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: clinic-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-clinic_db}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-postgres-password}
+    ports:
+
+
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - clinic_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: clinic-server
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${SERVER_PORT:-8765}:8765"
+    environment:
+      APP_SERVER_HOST: 0.0.0.0
+      APP_SERVER_PORT: 8765
+
+      APP_DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-clinic_db}
+      APP_DB_USERNAME: ${POSTGRES_USER:-postgres}
+      APP_DB_PASSWORD: ${POSTGRES_PASSWORD:-change-me-postgres-password}
+      APP_DB_HBM2DDL: ${DB_HBM2DDL:-update}
+
+      APP_SECURITY_JWT_SECRET: ${JWT_SECRET:-change-this-jwt-secret-at-least-32-bytes-long}
+
+
+
+      APP_MAIL_ENABLED: ${MAIL_ENABLED:-false}
+      APP_MAIL_SMTP_HOST: ${MAIL_SMTP_HOST:-smtp.gmail.com}
+      APP_MAIL_SMTP_PORT: ${MAIL_SMTP_PORT:-587}
+      APP_MAIL_SMTP_STARTTLS: ${MAIL_SMTP_STARTTLS:-true}
+      APP_MAIL_SMTP_AUTH: ${MAIL_SMTP_AUTH:-true}
+      APP_MAIL_USERNAME: ${MAIL_USERNAME:-your-mail@example.com}
+      APP_MAIL_PASSWORD: ${MAIL_PASSWORD:-your-app-password}
+      APP_MAIL_FROM: ${MAIL_FROM:-no-reply@clinic.local}
+      APP_MAIL_FROM_NAME: ${MAIL_FROM_NAME:-Клиника / Запись к врачу}
+
+      APP_REMINDER_ENABLED: ${REMINDER_ENABLED:-true}
+      APP_REMINDER_SCAN_PERIOD_SECONDS: ${REMINDER_SCAN_PERIOD_SECONDS:-60}
+      APP_REMINDER_LEAD_HOURS: ${REMINDER_LEAD_HOURS:-24}
+      APP_REMINDER_WORKER_THREADS: ${REMINDER_WORKER_THREADS:-2}
+
+      APP_BOOTSTRAP_CREATE_DEFAULT_ADMIN: ${BOOTSTRAP_CREATE_DEFAULT_ADMIN:-true}
+      APP_BOOTSTRAP_ADMIN_USERNAME: ${BOOTSTRAP_ADMIN_USERNAME:-admin}
+      APP_BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-change-me-admin-password}
+      APP_BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-admin@clinic.local}
+      APP_BOOTSTRAP_ADMIN_FULL_NAME: ${BOOTSTRAP_ADMIN_FULL_NAME:-Администратор системы}
+      APP_BOOTSTRAP_SEED_DEFAULT_DATA: ${BOOTSTRAP_SEED_DEFAULT_DATA:-true}
+      APP_BOOTSTRAP_SEED_RESOURCE: ${BOOTSTRAP_SEED_RESOURCE:-db/seed.sql}
+      APP_BOOTSTRAP_SEED_USER_PASSWORD: ${BOOTSTRAP_SEED_USER_PASSWORD:-password}
+
+volumes:
+  clinic_postgres_data:
